@@ -10,12 +10,11 @@ This is a simple web scraping service built in Go, using the `chromedp` package 
 .
 ├── server                # The main directory for the server-side code
 │   ├── helpers           # Helper functions for processing scraped data
-│   │   └── extractImages.go  # Contains helper functions for extracting images
-│   │   └── extractHeaders.go  # Contains helper functions for extracting headers
-│   │   └── extractEmails.go  # Contains helper functions for extracting emails
-│   │   └── extractLinks.go  # Contains helper functions for extracting links
-│   │   └── extractParagraphs.go  # Contains helper functions for extracting paragraphs
-
+│   │   └── ExtractImages.go  # Contains helper functions for extracting images
+│   │   └── ExtractHeaders.go  # Contains helper functions for extracting headers
+│   │   └── ExtractEmails.go  # Contains helper functions for extracting emails
+│   │   └── ExtractLinks.go  # Contains helper functions for extracting links
+│   │   └── ExtractParagraphs.go  # Contains helper functions for extracting paragraphs
 │   ├── models            # Data models for requests and responses
 │   │   └── models.go     # Contains RequestBody and ResponseBody structures
 │   └── main.go           # Entry point for the server
@@ -43,10 +42,12 @@ This file defines the request and response data structures that the server uses 
 
 - **Structs:**
     - `RequestBody`: Represents the structure of the incoming request. It contains the following fields:
-        - `Username`: The username of the person making the request.
         - `Url`: The URL to scrape.
-        - `Link`: A boolean to indicate if links should be scraped.
-        - `Paragraph`: A boolean to indicate if paragraphs should be scraped.
+        - `Link`: A boolean to indicate if links only should be scraped.
+        - `Paragraph`: A boolean to indicate if only paragraphs should be scraped.
+        - `Image`: A boolean to indicate if only images should be scraped.
+        - `Header`: A boolean to indicate if only headers should be scraped.
+        - `Email`: A boolean to indicate if only emails should be scraped.
         - `All`: A boolean to indicate if all available information (links, paragraphs, headers, emails, images) should be scraped.
     - `ResponseBody`: Represents the structure of the server's response. It contains the following fields:
         - `Title`: The title of the scraped web page.
@@ -61,6 +62,32 @@ This file contains helper functions used to process the scraped data.
 
 - **Functions:**
     - `ExtractImages(htmlContent string, body models.RequestBody) []string`: This function takes the HTML content of the page and extracts all the image sources (`<img src="...">`). It returns a list of image URLs, and if the `src` attribute is a relative path, it prepends the base URL (from `RequestBody.Url`).
+
+### 4. `server/helpers/extractHeaders.go`
+This file contains helper functions used to process the scraped data.
+
+- **Functions:**
+    - `ExtractHeaders(htmlContent string) []string`: This function takes the HTML content of the page and extracts all the headers (`<h1>` to `<h6>`). It returns a list of header text.
+
+### 5. `server/helpers/extractEmails.go`
+This file contains helper functions used to process the scraped data.
+
+- **Functions:**
+    - `ExtractEmails(htmlContent string, emailRegex *regexp.Regexp) []string`: This function takes the HTML content of the page and extracts all the email addresses using a regex. It returns a list of email addresses.
+
+### 6. `server/helpers/extractLinks.go`
+This file contains helper functions used to process the scraped data.
+
+- **Functions:**
+    - `ExtractLinks(htmlContent string) []string`: This function takes the HTML content of the page and extracts all the links (`<a href="...">`). It returns a list of link URLs.
+
+### 7. `server/helpers/extractParagraphs.go`
+This file contains helper functions used to process the scraped data.
+
+- **Functions:**
+    - `ExtractParagraphs(htmlContent string) []string`: This function takes the HTML content of the page and extracts all the paragraphs (`<p>...</p>`). It returns a list of paragraph text.
+
+
 
 ### Dependencies
 - **chromedp**: A headless browser package used to scrape dynamic content. Installed via:
@@ -83,7 +110,7 @@ go version
 ### Steps to Run:
 1. **Clone the repository**:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/AnasAitZouinet/scrapper.git
     cd scrapper
     ```
 
@@ -115,14 +142,14 @@ This request will scrape the page at `https://example.com`, and return all the l
     "title": "Example Domain",
     "links": ["https://www.iana.org/domains/example"],
     "paragraphs": ["This domain is for use in illustrative examples in documents."],
-    "images": [],
-    "headers": [],
-    "emails": []
+    "images": ["https://example.com/image.jpg"],
+    "headers": ["Example Domain"],
+    "emails": ["contact@example.com"]
 }
 ```
 
 ### Notes:
-- If `all: true` is specified in the request body, the server will extract all available content (links, paragraphs, images, headers, and emails). If `all` is false, only the content specified by `Link` and `Paragraph` flags will be extracted.
+- If `all: true` is specified in the request body, the server will extract all available content (links, paragraphs, images, headers, and emails). If `all` is false, only the content specified by `Link`, `Paragraph`, `Image`, `Header`, and `Email` flags will be extracted.
 - This project is set up to scrape static and dynamic websites using a headless browser for full-page rendering.
 
 ### Troubleshooting:
